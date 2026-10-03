@@ -1,0 +1,35 @@
+# GitHubのユーザー名/リポジトリ名
+backend:
+  name: github
+  repo: min-illust/illust-log
+  branch: main
+
+locale: ja
+site_url: /
+display_url: /
+
+# アップロードした画像の保存場所
+media_folder: images
+public_folder: /images
+
+collections:
+  - name: timeline
+    label: イラストタイムライン
+    files:
+      - name: posts
+        label: 作品一覧
+        file: data/posts.json
+        format: json
+        fields:
+          - name: posts
+            label: 作品
+            label_singular: 作品
+            widget: list
+            add_to_top: true
+            summary: "{{fields.date}}｜{{fields.title}}"
+            fields:
+              - { name: title, label: タイトル, widget: string }
+              - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+              - { name: image, label: 画像, widget: image, choose_url: false }
+              - { name: comment, label: コメント, widget: text, required: false }
+              - { name: tags, label: タグ（カンマ区切り）, widget: list, required: false }
