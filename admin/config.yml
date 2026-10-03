@@ -3,14 +3,17 @@ backend:
   name: github
   repo: min-illust/illust-log
   branch: main
+  # ログインはNetlifyのしくみを借りる（Netlify側の更新は止めてOK）
+  base_url: https://api.netlify.com
+  site_domain: min-illust.netlify.app
 
 locale: ja
-site_url: /
-display_url: /
+site_url: https://min-illust.github.io/illust-log/
+display_url: https://min-illust.github.io/illust-log/
 
 # アップロードした画像の保存場所
 media_folder: images
-public_folder: /images
+public_folder: images
 
 collections:
   - name: timeline
