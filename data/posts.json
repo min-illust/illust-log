@@ -1,1 +1,13 @@
-{"posts":[]}
+{
+  "posts": [
+    {
+      "title": "テスト",
+      "date": "2026-10-04",
+      "image": "/images/88503d12-9d9f-4a8f-b15d-e73f23aaa8bc.webp",
+      "comment": "可愛い",
+      "tags": [
+        "新作"
+      ]
+    }
+  ]
+}
