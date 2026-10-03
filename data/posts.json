@@ -1,3 +1,13 @@
 {
-  "posts": []
+  "posts": [
+    {
+      "title": "新キャラ",
+      "image": "/images/88503d12-9d9f-4a8f-b15d-e73f23aaa8bc.webp",
+      "comment": "かっこいい",
+      "tags": [
+        "新作"
+      ],
+      "date": "2026-10-04"
+    }
+  ]
 }
