@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noai, noimageai">
+<!--HEAD-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Layout: a photocopied gig-flyer wall — one ink rule down the left, each work pasted on as a taped flyer, dated like a show stub. */
+:root{
+  --paper:#eeece6; --ink:#141312; --ink-soft:#55524c; --line:#c9c5bb;
+  --hot:#ff2e6e; --tape:#f4e04d; --card:#fbfaf6; --on-hot:#fff;
+  --f-display:"Dela Gothic One","Hiragino Kaku Gothic StdN","Noto Sans JP",sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --f-mono:"Courier Prime","Courier New",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#121110; --ink:#efece4; --ink-soft:#a39f96; --line:#34312d;
+  --hot:#ff4f86; --tape:#d9c53c; --card:#1c1a18; color-scheme:dark}}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;
+  background-image:radial-gradient(color-mix(in srgb,var(--ink) 9%,transparent) 1px,transparent 1.2px);background-size:5px 5px}
+img{max-width:100%}
+[hidden]{display:none!important}
+a{color:inherit}
+.wrap{max-width:880px;margin:0 auto;padding-inline:16px;padding-block:calc(24px + env(safe-area-inset-top,0px)) calc(64px + env(safe-area-inset-bottom,0px))}
+
+/* 保存しにくくする */
+.shot img,.tile img,.lb img,.cover img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none;pointer-events:none}
+
+/* masthead */
+.mast{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:4px solid var(--ink);padding-bottom:14px}
+.mast a{text-decoration:none}
+.mast h1{font-family:var(--f-display);font-weight:400;font-size:clamp(40px,10vw,84px);line-height:.9;margin:0;letter-spacing:-.01em}
+.mast h1 .dot{color:var(--hot)}
+.mast h1 small{display:block;font-size:.34em;letter-spacing:.32em;margin-top:.5em;font-family:var(--f-mono);font-weight:700}
+.meta{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-align:right;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.meta b{color:var(--ink);font-size:22px;font-family:var(--f-display);font-weight:400;letter-spacing:0;display:block}
+
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px;font:700 13px var(--f-mono);letter-spacing:.04em}
+.crumbs a{text-decoration:none;border-bottom:2px solid var(--hot)}
+.crumbs span[aria-hidden]{color:var(--ink-soft)}
+
+.sec{margin-top:40px}
+.sec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.sec-h h2{font-family:var(--f-display);font-weight:400;font-size:clamp(24px,6vw,34px);margin:0;line-height:1.1;text-wrap:balance}
+.sec-h em{font:700 12px var(--f-mono);font-style:normal;letter-spacing:.12em;color:var(--ink-soft)}
+.sec-h .lead{flex-basis:100%;margin:2px 0 0;color:var(--ink-soft)}
+.label{display:inline-block;background:var(--ink);color:var(--paper);font:400 13px var(--f-display);padding:2px 10px 3px;transform:rotate(-2deg)}
+
+/* tiles (categories / tags) */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;text-decoration:none;background:var(--card);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);transition:transform .12s}
+.tile:hover{transform:translate(-2px,-2px)}
+.tile:focus-visible{outline:3px solid var(--hot);outline-offset:3px}
+.cover{aspect-ratio:1/1;background:var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;border-bottom:2px solid var(--ink)}
+.cover img{width:100%;height:100%;object-fit:cover}
+.cover .ph{font-family:var(--f-display);font-size:42px;color:var(--ink-soft)}
+.tile b{font-family:var(--f-display);font-weight:400;font-size:17px;line-height:1.3;padding:8px 10px 0;overflow-wrap:anywhere}
+.tile small{font:700 12px var(--f-mono);color:var(--ink-soft);padding:2px 10px 10px;letter-spacing:.06em}
+.tiles.big{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.tiles.big .tile b{font-size:22px}
+
+/* timeline */
+.tl{position:relative;padding-left:34px}
+.tl::before{content:"";position:absolute;left:9px;top:0;bottom:0;border-left:3px dashed var(--ink)}
+.month{position:relative;margin:30px 0 14px -34px;display:flex;align-items:center;gap:12px}
+.month span{font-family:var(--f-display);font-size:24px;background:var(--ink);color:var(--paper);padding:2px 12px 4px;transform:rotate(-2deg)}
+.month em{font:700 12px var(--f-mono);font-style:normal;letter-spacing:.12em;color:var(--ink-soft)}
+.post{position:relative;margin-bottom:44px}
+.post::before{content:"";position:absolute;left:-31px;top:6px;width:14px;height:14px;background:var(--hot);border:3px solid var(--ink);border-radius:50%}
+.stub{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;font:700 13px var(--f-mono);letter-spacing:.1em;margin-bottom:20px;font-variant-numeric:tabular-nums}
+.stub .d{font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:0}
+.stub .no{color:var(--ink-soft)}
+.pics{background:var(--ink);color:var(--paper);padding:1px 6px}
+.flyer{position:relative;background:var(--card);border:2px solid var(--ink);padding:12px 12px 16px;box-shadow:6px 6px 0 color-mix(in srgb,var(--ink) 85%,transparent);max-width:640px}
+.post:nth-of-type(odd) .flyer{transform:rotate(-.6deg)}
+.post:nth-of-type(even) .flyer{transform:rotate(.7deg)}
+.flyer::before,.flyer::after{content:"";position:absolute;top:-12px;width:78px;height:22px;background:color-mix(in srgb,var(--tape) 80%,transparent)}
+.flyer::before{left:14px;transform:rotate(-7deg)}
+.flyer::after{right:14px;transform:rotate(6deg)}
+.flyer h3{font-family:var(--f-display);font-weight:400;font-size:clamp(20px,4.6vw,28px);line-height:1.25;margin:14px 0 4px;text-wrap:balance}
+.flyer h3 a{text-decoration:none}
+.flyer h3 a:hover{color:var(--hot)}
+.flyer p{margin:6px 0 0;white-space:pre-wrap;max-width:62ch;overflow-wrap:anywhere}
+.flyer p.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font:700 11px var(--f-mono);letter-spacing:.06em;background:var(--hot);color:var(--on-hot);padding:3px 7px;text-decoration:none}
+.tag.cat{background:var(--ink);color:var(--paper)}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;font:400 14px/1 var(--f-display);border:3px solid var(--ink);background:var(--card);color:var(--ink);padding:10px 14px;cursor:pointer;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
+.btn.hot{background:var(--hot);color:var(--on-hot)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn:focus-visible,.shot:focus-visible,.play:focus-visible,.tag:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+
+/* images */
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.shots.n1{grid-template-columns:1fr}
+.shot{display:block;width:100%;padding:0;border:0;background:var(--line);cursor:zoom-in;overflow:hidden;position:relative}
+.shot img{display:block;width:100%;height:auto;max-height:78vh;object-fit:contain;background:var(--paper)}
+.shots.multi .shot{aspect-ratio:1/1}
+.shots.multi .shot img{height:100%;max-height:none;object-fit:cover}
+.shots.multi.odd .shot:first-child{grid-column:1/-1;aspect-ratio:4/3}
+.more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,9,8,.6);color:#fff;font-family:var(--f-display);font-size:28px}
+.stack{display:grid;gap:10px}
+.stack .shot img{max-height:none}
+
+/* media */
+.media{display:grid;gap:10px;margin-top:12px}
+.play{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:2px solid var(--ink);background:var(--paper);color:var(--ink);padding:10px;cursor:pointer;font:700 14px var(--f-body)}
+.play .ic{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--hot);color:var(--on-hot);font-size:18px}
+.play .yt{flex:none;width:96px;aspect-ratio:16/9;object-fit:cover;pointer-events:none}
+.play small{display:block;font:700 11px var(--f-mono);letter-spacing:.08em;color:var(--ink-soft)}
+.frame{position:relative;width:100%;aspect-ratio:16/9;border:2px solid var(--ink);background:#000}
+.frame.v{aspect-ratio:9/16;max-width:360px}
+.frame.suno{aspect-ratio:auto;height:260px;background:var(--paper)}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.ext{font:700 12px var(--f-mono);letter-spacing:.04em}
+
+.morebtn{display:block;margin:8px auto 0}
+.empty{border:3px dashed var(--ink);padding:32px 20px;text-align:center;background:var(--card)}
+.empty strong{display:block;font-family:var(--f-display);font-weight:400;font-size:clamp(24px,6vw,40px);line-height:1.1}
+.empty p{color:var(--ink-soft);margin:12px auto 0;max-width:40ch}
+
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:28px}
+.foot{margin-top:48px;font:700 11px var(--f-mono);letter-spacing:.12em;color:var(--ink-soft);border-top:2px solid var(--ink);padding-top:10px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+.foot .no-ai{letter-spacing:.04em;font-family:var(--f-body)}
+
+/* lightbox */
+.lb{position:fixed;inset:0;background:rgba(10,9,8,.94);display:flex;align-items:center;justify-content:center;padding:24px 16px 80px;z-index:50;cursor:zoom-out}
+.lb img{max-width:100%;max-height:100%;object-fit:contain}
+.lb-bar{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;align-items:center;gap:14px;color:#fff;font:700 14px var(--f-mono)}
+.lb-btn{background:#fff;color:#141312;border:0;font:400 20px/1 var(--f-display);width:44px;height:44px;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);font:700 13px var(--f-mono);padding:10px 16px;z-index:60}
+
+@media (prefers-reduced-motion: reduce){.post .flyer{transform:none!important}.tile{transition:none}}
+@media (max-width:480px){.tl{padding-left:26px}.tl::before{left:5px}.post::before{left:-27px}.month{margin-left:-26px}.meta{text-align:left}.tiles{grid-template-columns:1fr 1fr}.tiles.big{grid-template-columns:1fr 1fr}}
+</style>
+<!--BOOT-->
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <a href="__BASE__/"><h1>Min<span class="dot">.</span><small>ILLUST LOG</small></h1></a>
+    <div class="meta"><b id="count">—</b>WORKS POSTED<br><span id="range"></span></div>
+  </header>
+  <main id="app" aria-live="polite"><p style="margin-top:32px;font-family:var(--f-mono)">LOADING…</p></main>
+  <footer class="foot">
+    <span>© Min. — all works by the artist</span>
+    <span class="no-ai">掲載作品の無断転載・AI学習への利用を禁止します。</span>
+  </footer>
+</div>
+<div class="lb" id="lb" hidden><img id="lbImg" alt=""><div class="lb-bar" id="lbBar" hidden><button class="lb-btn" id="lbPrev" aria-label="前の画像">‹</button><span id="lbCount"></span><button class="lb-btn" id="lbNext" aria-label="次の画像">›</button></div></div>
+
+<script>
+(() => {
+  const B = window.__BOOT || { base: "", site: location.origin, post: null };
+  const $ = (s) => document.getElementById(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const WD = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+  const LATEST = 5, PAGE = 20;
+  let D = { posts: [], categories: [] };
+  let lbList = [], lbIdx = 0, shown = PAGE;
+
+  // ---- links ----
+  const enc = encodeURIComponent;
+  const catHref = (c) => `${B.base}/#/c/${enc(c)}`;
+  const tagHref = (c, t) => `${B.base}/#/c/${enc(c)}/t/${enc(t)}`;
+  const allHref = `${B.base}/#/all`;
+
+  // ---- analytics ----
+  function track(p){
+    let n = 0;
+    (function go(){
+      if (window.goatcounter && window.goatcounter.count){ window.goatcounter.count({ path: p }); return; }
+      if (++n < 20) setTimeout(go, 500);
+    })();
+  }
+
+  // ---- pieces ----
+  function shotsHTML(p, list, full){
+    const imgs = p.images; if (!imgs.length) return "";
+    if (full) return `<div class="stack">` + imgs.map((im, k) =>
+      `<button class="shot" data-lb="${list}" data-i="${k}" aria-label="${esc(p.title)}の${k+1}枚目を拡大"><img src="${esc(im.src)}" alt="${esc(p.title)} ${k+1}" ${im.w ? `width="${im.w}" height="${im.h}"` : ""} loading="${k ? "lazy" : "eager"}"></button>`).join("") + `</div>`;
+    const MAX = 5, part = imgs.slice(0, MAX), rest = imgs.length - part.length;
+    const cls = imgs.length === 1 ? "n1" : "multi" + (part.length % 2 ? " odd" : "");
+    return `<div class="shots ${cls}">` + part.map((im, k) =>
+      `<button class="shot" data-lb="${list}" data-i="${k}" aria-label="${esc(p.title)}の${k+1}枚目を拡大"><img src="${esc(imgs.length === 1 ? im.src : im.thumb)}" alt="${esc(p.title)} ${k+1}" loading="lazy">${k === part.length - 1 && rest > 0 ? `<span class="more">+${rest}</span>` : ""}</button>`).join("") + `</div>`;
+  }
+  function mediaHTML(p){
+    if (!p.media.length) return "";
+    return `<div class="media">` + p.media.map((m) => {
+      if (m.type === "youtube") return `<button class="play" data-embed="https://www.youtube-nocookie.com/embed/${esc(m.id)}?autoplay=1&rel=0" data-kind="${m.vertical ? "v" : "yt"}"><img class="yt" src="${esc(m.thumb)}" alt="" loading="lazy"><span>▶ 動画を再生<small>YOUTUBE</small></span></button>`;
+      if (m.type === "suno" && m.id) return `<button class="play" data-embed="https://suno.com/embed/${esc(m.id)}" data-kind="suno"><span class="ic">♪</span><span>曲を再生<small>SUNO</small></span></button><a class="ext" href="${esc(m.url)}" target="_blank" rel="noopener">Sunoで開く ↗</a>`;
+      if (m.type === "suno") return `<a class="play" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="ic">♪</span><span>Sunoで曲を聴く ↗<small>SUNO</small></span></a>`;
+      return `<a class="play" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="ic">↗</span><span>リンクを開く<small>${esc(new URL(m.url).hostname)}</small></span></a>`;
+    }).join("") + `</div>`;
+  }
+  function tagsHTML(p){
+    return `<div class="tags"><a class="tag cat" href="${catHref(p.category)}">${esc(p.category)}</a>` +
+      p.tags.map(t => `<a class="tag" href="${tagHref(p.category, t)}">#${esc(t)}</a>`).join("") + `</div>`;
+  }
+  function stubHTML(p, no){
+    const [y, m, d] = p.date.split("-");
+    const wd = WD[new Date(+y, m - 1, +d).getDay()];
+    return `<div class="stub"><span class="d">${m}/${d}</span><span>${wd}</span>${no ? `<span class="no">NO.${String(no).padStart(3,"0")}</span>` : ""}${p.images.length > 1 ? `<span class="pics">${p.images.length} PICS</span>` : ""}</div>`;
+  }
+  const numberOf = (p) => D.posts.length - D.posts.indexOf(p);
+
+  function timeline(list, listKey, months = true){
+    if (!list.length) return `<div class="empty"><strong>NO WORKS YET</strong><p>まだ作品がありません。</p></div>`;
+    let out = `<div class="tl">`, last = "";
+    list.forEach((p, i) => {
+      const mk = p.date.slice(0, 7).replace("-", ".");
+      if (months && mk !== last){
+        last = mk;
+        const n = list.filter(q => q.date.startsWith(p.date.slice(0, 7))).length;
+        out += `<div class="month"><span>${mk}</span><em>${n} WORK${n > 1 ? "S" : ""}</em></div>`;
+      }
+      out += `<article class="post">${stubHTML(p, numberOf(p))}<div class="flyer">
+        ${shotsHTML(p, listKey + ":" + i)}
+        <h3><a href="${esc(p.url)}">${esc(p.title)}</a></h3>
+        ${p.comment ? `<p class="clamp">${esc(p.comment)}</p>` : ""}
+        ${mediaHTML(p)}
+        ${tagsHTML(p)}
+        <div class="acts"><a class="btn" href="${esc(p.url)}">くわしく見る →</a>${p.charapu ? `<a class="btn hot" href="${esc(p.charapu)}" target="_blank" rel="noopener">このキャラと話す ↗</a>` : ""}</div>
+      </div></article>`;
+    });
+    return out + `</div>`;
+  }
+  function tile(href, cover, name, count, big){
+    return `<a class="tile" href="${href}"><span class="cover">${cover ? `<img src="${esc(cover)}" alt="" loading="lazy">` : `<span class="ph">♪</span>`}</span><b>${esc(name)}</b><small>${count} WORK${count > 1 ? "S" : ""}</small></a>`;
+  }
+  const coverOf = (p) => (p.images[0] && p.images[0].thumb) || (p.media.find(m => m.thumb) || {}).thumb || "";
+  const crumbs = (items) => `<nav class="crumbs" aria-label="現在地"><a href="${B.base}/">TOP</a>` +
+    items.map(([label, href]) => `<span aria-hidden="true">›</span>` + (href ? `<a href="${href}">${esc(label)}</a>` : `<span>${esc(label)}</span>`)).join("") + `</nav>`;
+
+  // ---- views ----
+  let lists = {};
+  function viewTop(){
+    lists = { top: D.posts.slice(0, LATEST) };
+    const cats = D.categories.filter(c => c.count > 0);
+    return `<section class="sec"><div class="sec-h"><span class="label">LATEST</span><h2>最近の更新</h2><em>NEW ${lists.top.length}</em></div>
+      ${timeline(lists.top, "top")}
+      ${D.posts.length > LATEST ? `<a class="btn morebtn" href="${allHref}">すべての作品を見る（${D.posts.length}）→</a>` : ""}</section>
+      <section class="sec"><div class="sec-h"><span class="label">CATEGORY</span><h2>分類から探す</h2></div>
+      ${cats.length ? `<div class="tiles big">${cats.map(c => tile(catHref(c.name), c.cover, c.name, c.count)).join("")}</div>` : `<div class="empty"><p>分類はまだありません。</p></div>`}</section>`;
+  }
+  function viewAll(){
+    lists = { all: D.posts.slice(0, shown) };
+    return crumbs([["すべての作品"]]) + `<section class="sec"><div class="sec-h"><h2>すべての作品</h2><em>${D.posts.length} WORKS</em></div>
+      ${timeline(lists.all, "all")}${shown < D.posts.length ? `<button class="btn morebtn" data-more>もっと見る</button>` : ""}</section>`;
+  }
+  function viewCat(cat){
+    const ps = D.posts.filter(p => p.category === cat);
+    const info = D.categories.find(c => c.name === cat) || { description: "" };
+    const tags = {};
+    ps.forEach(p => p.tags.forEach(t => { (tags[t] = tags[t] || []).push(p); }));
+    const tagList = Object.entries(tags).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], "ja"));
+    lists = { cat: ps.slice(0, shown) };
+    return crumbs([[cat]]) + `<section class="sec"><div class="sec-h"><h2>${esc(cat)}</h2><em>${ps.length} WORKS</em>${info.description ? `<p class="lead">${esc(info.description)}</p>` : ""}</div>
+      ${tagList.length ? `<div class="sec-h"><span class="label">TAGS</span></div><div class="tiles">${tagList.map(([t, arr]) => tile(tagHref(cat, t), arr.map(coverOf).find(Boolean), "#" + t, arr.length)).join("")}</div>` : ""}
+      </section><section class="sec"><div class="sec-h"><span class="label">ALL</span><h2>${esc(cat)}の作品</h2></div>
+      ${timeline(lists.cat, "cat")}${shown < ps.length ? `<button class="btn morebtn" data-more>もっと見る</button>` : ""}</section>`;
+  }
+  function viewTag(cat, tag){
+    const ps = D.posts.filter(p => p.category === cat && p.tags.includes(tag));
+    lists = { tag: ps.slice(0, shown) };
+    return crumbs([[cat, catHref(cat)], ["#" + tag]]) + `<section class="sec"><div class="sec-h"><h2>#${esc(tag)}</h2><em>${esc(cat)} · ${ps.length} WORKS</em></div>
+      ${timeline(lists.tag, "tag")}${shown < ps.length ? `<button class="btn morebtn" data-more>もっと見る</button>` : ""}</section>`;
+  }
+  function viewPost(slug){
+    const p = D.posts.find(x => x.slug === slug);
+    if (!p) return `<div class="empty" style="margin-top:32px"><strong>NOT FOUND</strong><p>この作品は見つかりませんでした。</p><p><a class="btn" href="${B.base}/">トップへ</a></p></div>`;
+    lists = { post: [p] };
+    const same = D.posts.filter(x => x.category === p.category), i = same.indexOf(p);
+    const newer = same[i - 1], older = same[i + 1];
+    const share = `${B.site}/w/${p.slug}/`;
+    const xText = `${p.title}｜Min. ILLUST LOG` + (B.x ? ` @${B.x}` : "");
+    document.title = `${p.title}｜Min. ILLUST LOG`;
+    return crumbs([[p.category, catHref(p.category)], [p.title]]) + `<article class="sec detail">
+      ${stubHTML(p, numberOf(p))}<div class="flyer" style="max-width:none;transform:none">
+      ${shotsHTML(p, "post:0", true)}
+      <h3 style="font-size:clamp(24px,6vw,36px)">${esc(p.title)}</h3>
+      ${p.comment ? `<p>${esc(p.comment)}</p>` : ""}
+      ${mediaHTML(p)}
+      ${tagsHTML(p)}
+      <div class="acts">
+        ${p.charapu ? `<a class="btn hot" href="${esc(p.charapu)}" target="_blank" rel="noopener">このキャラと話す ↗</a>` : ""}
+        <a class="btn" href="https://x.com/intent/post?text=${enc(xText)}&url=${enc(share)}" target="_blank" rel="noopener">Xで共有</a>
+        <button class="btn" data-copy="${esc(share)}">リンクをコピー</button>
+      </div></div></article>
+      <nav class="pager">${newer ? `<a class="btn" href="${esc(newer.url)}">← 新しい作品</a>` : "<span></span>"}${older ? `<a class="btn" href="${esc(older.url)}">古い作品 →</a>` : ""}</nav>`;
+  }
+
+  function route(){
+    const app = $("app");
+    let html, path;
+    if (B.post){ html = viewPost(B.post); path = `/w/${B.post}/`; }
+    else {
+      const h = location.hash.replace(/^#\/?/, "").split("/").map(s => { try { return decodeURIComponent(s); } catch { return s; } });
+      if (h[0] === "c" && h[1] && h[2] === "t" && h[3]){ html = viewTag(h[1], h[3]); path = `/c/${h[1]}/t/${h[3]}`; }
+      else if (h[0] === "c" && h[1]){ html = viewCat(h[1]); path = `/c/${h[1]}`; }
+      else if (h[0] === "all"){ html = viewAll(); path = "/all"; }
+      else { html = viewTop(); path = "/"; }
+    }
+    app.innerHTML = html;
+    return path;
+  }
+  let lastHash = null;
+  function go(scroll){
+    if (location.hash !== lastHash){ shown = PAGE; }
+    lastHash = location.hash;
+    const p = route();
+    if (scroll) window.scrollTo(0, 0);
+    track(p);
+  }
+
+  // ---- load ----
+  fetch(`${B.base}/data/site.json`, { cache: "no-cache" })
+    .then(r => r.json())
+    .then(j => { D = j; })
+    .catch(() => {})
+    .finally(() => {
+      $("count").textContent = D.posts.length;
+      const s = D.posts;
+      $("range").textContent = s.length ? `${s[s.length-1].date.replaceAll("-", ".")} → ${s[0].date.replaceAll("-", ".")}` : "";
+      go(false);
+    });
+  window.addEventListener("hashchange", () => go(true));
+
+  // ---- interactions ----
+  function showLb(){
+    $("lbImg").src = lbList[lbIdx].src;
+    $("lbBar").hidden = lbList.length < 2;
+    $("lbCount").textContent = `${lbIdx + 1} / ${lbList.length}`;
+  }
+  function step(d){ if (lbList.length > 1){ lbIdx = (lbIdx + d + lbList.length) % lbList.length; showLb(); } }
+  $("lbPrev").addEventListener("click", e => { e.stopPropagation(); step(-1); });
+  $("lbNext").addEventListener("click", e => { e.stopPropagation(); step(1); });
+  let sx = null, swiped = false;
+  $("lb").addEventListener("touchstart", e => { sx = e.touches[0].clientX; swiped = false; }, { passive: true });
+  $("lb").addEventListener("touchend", e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40){ step(dx < 0 ? 1 : -1); swiped = true; } sx = null; });
+
+  function toast(msg){ const el = document.createElement("div"); el.className = "toast"; el.textContent = msg; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); }
+
+  document.addEventListener("click", (e) => {
+    const lbBtn = e.target.closest("[data-lb]");
+    if (lbBtn){
+      const [key, i] = lbBtn.dataset.lb.split(":");
+      const p = (lists[key] || [])[+i]; if (!p) return;
+      lbList = p.images; lbIdx = +lbBtn.dataset.i; showLb(); $("lb").hidden = false; return;
+    }
+    const play = e.target.closest("[data-embed]");
+    if (play){
+      const kind = play.dataset.kind;
+      const f = document.createElement("div");
+      f.className = "frame" + (kind === "v" ? " v" : kind === "suno" ? " suno" : "");
+      const ifr = document.createElement("iframe");
+      ifr.src = play.dataset.embed; ifr.title = "プレーヤー"; ifr.loading = "lazy";
+      ifr.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; ifr.allowFullscreen = true;
+      f.appendChild(ifr); play.replaceWith(f); return;
+    }
+    if (e.target.closest("[data-more]")){ shown += PAGE; const y = window.scrollY; route(); window.scrollTo(0, y); return; }
+    const cp = e.target.closest("[data-copy]");
+    if (cp){
+      const t = cp.dataset.copy;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast("リンクをコピーしました"), () => { window.prompt && window.prompt("このリンクをコピーしてください", t); });
+      return;
+    }
+    if (e.target.closest("#lb")){ if (swiped){ swiped = false; return; } $("lb").hidden = true; }
+  });
+  document.addEventListener("keydown", e => {
+    if ($("lb").hidden) return;
+    if (e.key === "Escape") $("lb").hidden = true;
+    if (e.key === "ArrowRight") step(1);
+    if (e.key === "ArrowLeft") step(-1);
+  });
+  // 右クリック・長押し・ドラッグでの保存を防ぐ
+  const guard = (e) => { if (e.target.closest && e.target.closest(".shot, .tile, .lb, .cover, .play")) e.preventDefault(); };
+  document.addEventListener("contextmenu", guard);
+  document.addEventListener("dragstart", guard);
+})();
+</script>
+</body>
+</html>
