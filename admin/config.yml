@@ -62,6 +62,66 @@ collections:
       - { name: charapu, label: キャラぷのURL（あるときだけ）, widget: string, required: false, hint: "入れると「このキャラと話す」ボタンが出ます" }
       - { name: pickup, label: ピックアップ（将来のポートフォリオ用・今はサイトに表示されません）, widget: boolean, default: false, required: false }
 
+  # ── キャラリンク集（/chara/ に表示・キャラぷに貼る用） ──
+  - name: characters
+    label: キャラ（リンク集）
+    label_singular: キャラ
+    description: "キャラぷに貼るキャラリンク集（/chara/）。ここに入れたキャラぷのURL以外へのリンクは出ません。"
+    folder: content/characters
+    format: json
+    extension: json
+    create: true
+    delete: true
+    slug: "{{year}}{{month}}{{day}}-{{hour}}{{minute}}{{second}}"
+    identifier_field: title
+    summary: "{{published}}｜{{category}}｜{{title}}"
+    sortable_fields: [published, title, category]
+    view_groups:
+      - { label: カテゴリー, field: category }
+    editor: { preview: false }
+    fields:
+      - { name: title, label: キャラ名（作品名）, widget: string }
+      - { name: published, label: 公開日, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - name: category
+        label: カテゴリー
+        widget: select
+        options: ["1:1ロールプレイ", "シミュレーション"]
+        default: "1:1ロールプレイ"
+      - name: genres
+        label: ジャンル（複数OK）
+        widget: select
+        multiple: true
+        min: 1
+        options: ["恋愛", "日常・現代", "ファンタジー", "BL", "その他"]
+      - { name: tagline, label: 一言紹介, widget: text, required: false }
+      - { name: tags, label: タグ（カンマ区切り・任意）, widget: list, required: false }
+      - { name: thumb, label: サムネ（顔のイラスト・正方形に自動で切り抜き）, widget: image, choose_url: false, required: false }
+      - name: story
+        label: ストーリーのURL（キャラぷ・あるときだけ）
+        widget: string
+        required: false
+        pattern: ['^$|^https://([a-z0-9-]+\.)*kyarapu\.com/', "キャラぷのURL（https://〜kyarapu.com/〜）だけ入れられます"]
+      - name: talk
+        label: トークのURL（キャラぷ・あるときだけ）
+        widget: string
+        required: false
+        pattern: ['^$|^https://([a-z0-9-]+\.)*kyarapu\.com/', "キャラぷのURL（https://〜kyarapu.com/〜）だけ入れられます"]
+      - name: updates
+        label: 更新履歴（スチル追加など。新しいものを上に）
+        label_singular: 更新
+        widget: list
+        required: false
+        add_to_top: true
+        summary: "{{fields.date}}｜{{fields.text}}"
+        fields:
+          - { name: date, label: 日付, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+          - { name: text, label: 内容（例：スチル追加）, widget: string }
+      - name: illust_tags
+        label: イラスト用の別名（任意）
+        widget: list
+        required: false
+        hint: "ILLUST LOGのタグがキャラ名と違うときだけ（例：岳人）。キャラぷのURLかキャラ名が一致する作品は自動で並びます"
+
   # ── サイト設定 ──
   - name: settings
     label: サイト設定

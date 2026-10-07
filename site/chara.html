@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--HEAD-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e0e0e;
+    --ink-2:#1c1b19;
+    --paper:#f1ebdd;
+    --paper-2:#e6dfcd;
+    --red:#e5281e;
+    --yellow:#f5d90a;
+    --muted:#8a8475;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink);color:var(--paper);
+    font-family:"Zen Kaku Gothic New",sans-serif;min-height:100vh;
+    background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);
+    background-size:4px 4px;
+  }
+  body.lock{overflow:hidden}
+  .wrap{max-width:560px;margin:0 auto;padding:28px 16px 64px}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+
+  /* ===== HEADER ===== */
+  header{position:relative;margin-bottom:22px}
+  .now{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.2em;color:var(--yellow)}
+  .logo{font-family:"Anton",sans-serif;font-size:76px;line-height:.9;margin:6px 0 4px}
+  .logo span{color:var(--red)}
+  .sub{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.12em;color:#bdb6a6}
+  .stamp{
+    position:absolute;right:4px;top:18px;transform:rotate(8deg);
+    border:2px solid var(--red);color:var(--red);
+    font-family:"Anton",sans-serif;font-size:14px;letter-spacing:.08em;
+    padding:6px 10px;line-height:1.15;text-align:center;
+  }
+  .author{
+    display:inline-block;margin-top:14px;background:var(--paper);color:var(--ink);
+    font-weight:900;font-size:13px;padding:4px 10px;transform:rotate(-1.5deg);
+  }
+
+  .label{
+    display:flex;align-items:center;gap:10px;margin:26px 0 12px;
+    font-family:"Anton",sans-serif;font-size:24px;letter-spacing:.04em;
+  }
+  .label::after{content:"";flex:1;height:2px;background:var(--paper)}
+  .label small{font-family:"Space Mono",monospace;font-size:11px;color:var(--yellow);letter-spacing:.1em;order:2}
+  .label::after{order:3}
+
+  /* ===== PICKUP (NEW / UPDATE) ===== */
+  .pickup{
+    display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;
+    margin:0 -16px;padding:14px 16px 16px;
+    scrollbar-width:none;
+  }
+  .pickup::-webkit-scrollbar{display:none}
+  .pk{
+    flex:0 0 138px;scroll-snap-align:start;text-align:left;
+    background:var(--yellow);color:var(--ink);padding:8px 8px 10px;position:relative;
+    box-shadow:4px 4px 0 var(--red);
+  }
+  .pk:nth-child(odd){transform:rotate(-1.2deg)}
+  .pk:nth-child(even){transform:rotate(1deg)}
+  .pk img{width:100%;aspect-ratio:1;object-fit:cover;border:2px solid var(--ink);display:block;background:var(--paper-2)}
+  .pk .k{
+    position:absolute;top:-9px;left:-5px;font-family:"Anton",sans-serif;font-size:13px;
+    letter-spacing:.06em;padding:1px 7px;background:var(--ink);color:var(--yellow);
+  }
+  .pk .k.new{background:var(--red);color:var(--paper)}
+  .pk .n{font-weight:900;font-size:13px;margin-top:6px;line-height:1.25;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pk .w{font-size:11px;font-weight:700;margin-top:2px;line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .pk .d{font-family:"Space Mono",monospace;font-size:10px;margin-top:4px;opacity:.75}
+
+  /* ===== FILTER BAR (sticky) ===== */
+  .filters{
+    position:sticky;top:0;z-index:20;
+    margin:0 -16px;padding:10px 16px 10px;
+    background:rgba(14,14,14,.94);backdrop-filter:blur(6px);
+    border-bottom:2px solid var(--paper);
+  }
+  .search{
+    display:flex;align-items:center;gap:8px;
+    background:var(--paper);color:var(--ink);padding:0 10px;height:40px;
+    border:2px solid var(--paper);
+  }
+  .search svg{flex:none}
+  .search input{
+    flex:1;min-width:0;border:none;outline:none;background:transparent;
+    font:700 15px "Zen Kaku Gothic New",sans-serif;color:var(--ink);
+  }
+  .search input::placeholder{color:#8f887a;font-weight:500}
+  .clear{font-family:"Space Mono",monospace;font-size:12px;font-weight:700;padding:4px;display:none}
+  .clear.on{display:block}
+
+  .cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px;border:2px solid var(--paper)}
+  .cat{
+    padding:7px 2px;font-weight:900;font-size:12px;text-align:center;
+    border-left:2px solid var(--paper);line-height:1.2;
+  }
+  .cat:first-child{border-left:none}
+  .cat.on{background:var(--paper);color:var(--ink)}
+
+  .genres{display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none}
+  .genres::-webkit-scrollbar{display:none}
+  .chip{
+    flex:none;padding:4px 11px;font-size:12px;font-weight:700;
+    border:1.5px solid var(--paper);white-space:nowrap;
+  }
+  .chip.on{background:var(--red);border-color:var(--red);color:var(--paper)}
+
+  .hint{font-size:10px;color:var(--muted);margin-top:5px}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px}
+  .count{font-family:"Space Mono",monospace;font-size:11px;color:var(--yellow);letter-spacing:.06em}
+  .tools{display:flex;gap:6px;align-items:center}
+  .sort{
+    appearance:none;background:transparent;color:var(--paper);
+    border:1.5px solid var(--paper);font:700 11px "Zen Kaku Gothic New",sans-serif;
+    padding:3px 22px 3px 8px;
+    background-image:linear-gradient(45deg,transparent 50%,var(--paper) 50%),linear-gradient(135deg,var(--paper) 50%,transparent 50%);
+    background-position:calc(100% - 11px) 50%,calc(100% - 7px) 50%;background-size:4px 4px;background-repeat:no-repeat;
+  }
+  .sort option{color:var(--ink)}
+  .view{display:flex;border:1.5px solid var(--paper)}
+  .view button{padding:3px 6px;display:flex}
+  .view button.on{background:var(--paper);color:var(--ink)}
+
+  /* ===== GRID ===== */
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;margin-top:16px}
+  @media(min-width:480px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  .cell{text-align:left;position:relative;display:block;width:100%;min-width:0}
+  .cell .ph{position:relative;background:var(--paper);padding:4px;box-shadow:3px 3px 0 rgba(229,40,30,.85)}
+  .cell img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--paper-2)}
+  .cell .nm{font-weight:900;font-size:12px;margin-top:7px;line-height:1.25;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cell .gn{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mini{
+    position:absolute;top:-6px;right:-4px;font-family:"Anton",sans-serif;font-size:11px;
+    letter-spacing:.05em;padding:0 5px;line-height:1.5;
+  }
+  .mini.new{background:var(--red);color:var(--paper);transform:rotate(5deg)}
+  .mini.up{background:var(--yellow);color:var(--ink);transform:rotate(-4deg)}
+
+  /* ===== LIST VIEW ===== */
+  .list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+  .row{
+    display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:center;text-align:left;
+    background:var(--paper);color:var(--ink);padding:8px;position:relative;width:100%;
+    box-shadow:3px 3px 0 rgba(229,40,30,.85);
+  }
+  .row img{width:72px;height:72px;object-fit:cover;border:2px solid var(--ink);display:block}
+  .row .nm{font-weight:900;font-size:15px}
+  .row .tl{font-size:12px;line-height:1.45;margin-top:2px;color:#2a2722;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .row .gn{font-size:10px;color:#6b655a;margin-top:3px;font-weight:700}
+  .row .mini{top:-7px;right:-5px}
+
+  .empty{text-align:center;padding:40px 0;font-weight:700;color:var(--muted);font-size:14px}
+  .empty b{display:block;font-family:"Anton",sans-serif;font-size:28px;color:var(--paper);letter-spacing:.05em;margin-bottom:6px}
+
+  /* ===== DETAIL SHEET ===== */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    max-width:560px;margin:0 auto;max-height:88vh;overflow-y:auto;
+    background:var(--paper);color:var(--ink);
+    padding:16px 16px 22px;border-top:4px solid var(--red);
+    transform:translateY(105%);visibility:hidden;transition:transform .25s ease,visibility 0s .25s;
+  }
+  .sheet.on{transform:translateY(0);visibility:visible;transition:transform .25s ease}
+  .sheet .close{
+    position:absolute;top:10px;right:10px;width:34px;height:34px;
+    background:var(--ink);color:var(--paper);font-family:"Anton",sans-serif;font-size:18px;
+  }
+  .sh-top{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:end;padding-right:34px}
+  .sh-top img{width:120px;height:120px;object-fit:cover;border:3px solid var(--ink);display:block;transform:rotate(-1.5deg);box-shadow:4px 4px 0 var(--red)}
+  .sh-badges{display:flex;gap:4px;margin-bottom:6px}
+  .bd{font-family:"Anton",sans-serif;font-size:13px;letter-spacing:.06em;padding:1px 7px}
+  .bd.new{background:var(--red);color:var(--paper)}
+  .bd.up{background:var(--yellow);border:2px solid var(--ink)}
+  .sh-title{font-weight:900;font-size:21px;line-height:1.25}
+  .sh-cat{font-size:11px;font-weight:700;margin-top:4px;color:#4a463e}
+  .sh-genres{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+  .sg{font-size:11px;font-weight:900;background:var(--red);color:var(--paper);padding:1px 7px}
+  .sh-tl{font-size:14px;line-height:1.65;margin-top:14px}
+  .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+  .tag{font-size:11px;font-weight:700;border:1.5px solid var(--ink);padding:1px 6px}
+  .sh-date{font-family:"Space Mono",monospace;font-size:11px;color:#6b655a;margin-top:10px}
+  .btns{display:flex;gap:8px;margin-top:14px}
+  .btn{
+    flex:1;text-align:center;text-decoration:none;
+    font-family:"Anton",sans-serif;font-size:19px;letter-spacing:.08em;
+    padding:9px 0 8px;border:2px solid var(--ink);
+  }
+  .btn:active{transform:translate(2px,2px)}
+  .btn.story{background:var(--ink);color:var(--paper)}
+  .btn.talk{background:var(--red);color:var(--paper);border-color:var(--red)}
+  .btn small{font-family:"Zen Kaku Gothic New",sans-serif;font-size:10px;font-weight:700;display:block;letter-spacing:0;margin-top:-1px}
+  .hist{margin-top:16px;border-top:2px dashed rgba(0,0,0,.3);padding-top:10px}
+  .hist h4{font-family:"Anton",sans-serif;font-size:14px;letter-spacing:.08em}
+  .hist li{list-style:none;font-size:12px;padding:3px 0;display:flex;gap:10px}
+  .hist li span{font-family:"Space Mono",monospace;font-weight:700;flex:none}
+
+
+  /* ===== ILLUST GALLERY ===== */
+  .gal{margin-top:18px;border-top:2px dashed rgba(0,0,0,.3);padding-top:12px}
+  .gal h4{font-family:"Anton",sans-serif;font-size:16px;letter-spacing:.08em;display:flex;align-items:baseline;gap:8px}
+  .gal h4 small{font-family:"Space Mono",monospace;font-size:11px;color:#6b655a}
+  .gal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+  .gal-grid button{position:relative;display:block;width:100%;aspect-ratio:1;background:var(--paper-2);border:2px solid var(--ink);overflow:hidden}
+  .gal-grid img{width:100%;height:100%;object-fit:cover;display:block}
+  .gal-grid .more{position:absolute;inset:0;background:rgba(14,14,14,.7);color:var(--paper);
+    font-family:"Anton",sans-serif;font-size:20px;display:flex;align-items:center;justify-content:center}
+  .gal-note{font-size:12px;color:#6b655a;margin-top:8px}
+
+  .lb{position:fixed;inset:0;z-index:70;background:rgba(10,10,10,.96);display:none;flex-direction:column}
+  .lb.on{display:flex}
+  .lb-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;color:var(--paper)}
+  .lb-count{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.1em;color:var(--yellow)}
+  .lb-x{width:36px;height:36px;background:var(--paper);color:var(--ink);font-family:"Anton",sans-serif;font-size:18px}
+  .lb-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 10px;touch-action:pan-y}
+  .lb-stage img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .lb-cap{padding:10px 16px 22px;color:var(--paper);text-align:center}
+  .lb-cap b{font-weight:900;font-size:14px}
+  .lb-cap span{display:block;font-family:"Space Mono",monospace;font-size:11px;color:var(--muted);margin-top:2px}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:56px;background:rgba(241,235,221,.12);
+    color:var(--paper);font-family:"Anton",sans-serif;font-size:22px}
+  .lb-nav.p{left:6px}.lb-nav.n{right:6px}
+
+  footer{margin-top:44px;text-align:center;font-family:"Space Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.15em}
+
+  @media(max-width:360px){
+    .logo{font-size:62px}
+    .sh-top{grid-template-columns:96px 1fr}.sh-top img{width:96px;height:96px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="now">now creating —</p>
+    <h1 class="logo">MIN<span>.</span></h1>
+    <p class="sub">CHARACTER LINKS on キャラぷ</p>
+    <div class="stamp">ORIGINAL<br>CHARACTERS</div>
+    <p class="author">作者：Min.</p>
+  </header>
+
+  <h2 class="label" id="pickupLabel">NEW &amp; UPDATE <small>← SWIPE</small></h2>
+  <div class="pickup" id="pickup"></div>
+
+  <h2 class="label" id="allTop">ALL CHARACTERS</h2>
+
+  <div class="filters" id="filters">
+    <label class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+      <input id="q" type="search" placeholder="名前・タグ・キーワードで検索" autocomplete="off">
+      <button class="clear" id="clear" aria-label="クリア">✕</button>
+    </label>
+    <div class="cats" id="cats"></div>
+    <div class="genres" id="genres"></div>
+    <p class="hint">ジャンルは複数タップで掛け合わせ（例：BL × ファンタジー）</p>
+    <div class="meta">
+      <span class="count" id="count"></span>
+      <div class="tools">
+        <select class="sort" id="sort" aria-label="並び替え">
+          <option value="new">新しい順</option>
+          <option value="up">更新順</option>
+          <option value="name">名前順</option>
+        </select>
+        <div class="view" id="view">
+          <button data-v="grid" class="on" aria-label="グリッド表示">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>
+          </button>
+          <button data-v="list" aria-label="リスト表示">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="4" height="4"/><rect x="7" y="3" width="8" height="2"/><rect x="1" y="10" width="4" height="4"/><rect x="7" y="11" width="8" height="2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+  <footer>made by Min.</footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" aria-modal="true" role="dialog"></aside>
+<div class="lb" id="lb" role="dialog" aria-modal="true">
+  <div class="lb-bar"><span class="lb-count" id="lbCount"></span><button class="lb-x" id="lbX" aria-label="閉じる">✕</button></div>
+  <div class="lb-stage" id="lbStage"><img id="lbImg" alt=""></div>
+  <button class="lb-nav p" id="lbP" aria-label="前へ">‹</button>
+  <button class="lb-nav n" id="lbN" aria-label="次へ">›</button>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<!--BOOT-->
+<script>
+/* ================= 設定 ================= */
+const BOOT = window.__CHARA || {characters:[]};
+const TODAY = new Date();
+const BADGE_DAYS = 14;                  // NEW / UPDATE を出す日数
+const PICKUP_MAX = 8;                   // 上部ピックアップの最大数
+const GALLERY_PREVIEW = 6;              // 詳細画面に最初に並べるイラスト枚数
+
+const CATEGORIES = BOOT.categories || ["1:1ロールプレイ","シミュレーション"];
+const GENRES = BOOT.genres || ["恋愛","日常・現代","ファンタジー","BL","その他"];
+
+/* キャラデータ（管理画面で追加 → 公開時にここへ埋め込まれます） */
+const characters = BOOT.characters || [];
+
+
+/* ================= ユーティリティ ================= */
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const daysAgo=d=>Math.floor((TODAY-new Date(d))/86400000);
+const dot=d=>d.replace(/-/g,".");
+const md=d=>{const[,m,dd]=d.split("-");return `${+m}/${+dd}`};
+function isKyarapu(url){
+  try{const u=new URL(url);return u.protocol==="https:"&&(u.hostname==="kyarapu.com"||u.hostname.endsWith(".kyarapu.com"))}
+  catch(e){return false}
+}
+// 全角・半角、ひらがな・カタカナの違いを吸収して検索
+const norm=s=>String(s??"").normalize("NFKC").toLowerCase()
+  .replace(/[ァ-ヶ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60));
+
+function lastUpdate(c){return (c.updates||[]).map(u=>u.date).sort().pop()||""}
+function status(c){
+  if(daysAgo(c.published)<=BADGE_DAYS) return "new";
+  const lu=lastUpdate(c); if(lu&&daysAgo(lu)<=BADGE_DAYS) return "up";
+  return "";
+}
+
+/* 見本用の顔イラスト（本番はアップした画像） */
+const faceCache={};
+function face(c,i){
+  if(c.thumb) return c.thumb;
+  if(faceCache[c.id]) return faceCache[c.id];
+  const h=[...c.id].reduce((a,ch)=>a+ch.charCodeAt(0),0)+i;
+  const hair=["#1b1b1b","#5a2a1e","#c9b48a","#3b4a6b","#7a1d1d","#e8e3d6"][h%6];
+  const bg=["#e5281e","#f5d90a","#0e0e0e","#d9d2c0"][h%4];
+  const eye=h%3===0?"M44 62 q6 -5 12 0 M64 62 q6 -5 12 0":"M46 62 l8 0 M66 62 l8 0";
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' fill='${bg}'/>
+  <circle cx='60' cy='130' r='48' fill='#f1ebdd' stroke='#0e0e0e' stroke-width='3'/>
+  <ellipse cx='60' cy='60' rx='30' ry='34' fill='#f6e2cf' stroke='#0e0e0e' stroke-width='3'/>
+  <path d='M28 60 Q28 20 60 20 Q93 20 92 60 Q${80+h%10} 36 ${56+h%14} 36 Q42 46 28 60Z' fill='${hair}' stroke='#0e0e0e' stroke-width='3'/>
+  <path d='${eye}' stroke='#0e0e0e' stroke-width='4' fill='none' stroke-linecap='round'/>
+  <path d='M54 80 Q60 84 66 80' stroke='#0e0e0e' stroke-width='3' fill='none' stroke-linecap='round'/></svg>`;
+  return faceCache[c.id]="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+const idx={}; characters.forEach((c,i)=>idx[c.id]=i);
+
+/* ================= イラスト（公開時に ILLUST LOG から自動で紐づけ済み） ================= */
+const illustPosts=[];
+function illustsFor(c){ return c.illusts || []; }
+
+/* ライトボックス（ページ内で拡大。外部リンクなし） */
+const lb=document.getElementById("lb"),lbImg=document.getElementById("lbImg");
+let lbList=[],lbI=0;
+function lbShow(){const it=lbList[lbI];lbImg.src=it.src;
+  document.getElementById("lbCount").textContent=`${lbI+1} / ${lbList.length}`;
+  document.getElementById("lbCap").innerHTML=`<b>${esc(it.title)}</b><span>${esc(dot(it.date||""))}</span>`;
+  document.getElementById("lbP").style.display=document.getElementById("lbN").style.display=lbList.length>1?"":"none";}
+function lbOpen(list,i){lbList=list;lbI=i;lbShow();lb.classList.add("on")}
+function lbClose(){lb.classList.remove("on");lbImg.removeAttribute("src")}
+const lbStep=d=>{lbI=(lbI+d+lbList.length)%lbList.length;lbShow()};
+document.getElementById("lbX").onclick=lbClose;
+document.getElementById("lbP").onclick=()=>lbStep(-1);
+document.getElementById("lbN").onclick=()=>lbStep(1);
+let tx=null;
+const st=document.getElementById("lbStage");
+st.addEventListener("touchstart",e=>{tx=e.touches[0].clientX},{passive:true});
+st.addEventListener("touchend",e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;tx=null;
+  if(Math.abs(dx)>40&&lbList.length>1)lbStep(dx<0?1:-1)});
+st.addEventListener("click",e=>{if(e.target===st)lbClose()});
+
+/* ================= ピックアップ ================= */
+(function renderPickup(){
+  const ev=[];
+  characters.forEach(c=>{
+    if(daysAgo(c.published)<=BADGE_DAYS) ev.push({c,date:c.published,text:"新キャラ公開",k:"new"});
+    (c.updates||[]).forEach(u=>{ if(daysAgo(u.date)<=BADGE_DAYS) ev.push({c,date:u.date,text:u.text,k:"up"}) });
+  });
+  ev.sort((a,b)=>b.date.localeCompare(a.date));
+  const seen=new Set(), items=[];
+  for(const e of ev){ if(seen.has(e.c.id)) continue; seen.add(e.c.id); items.push(e); if(items.length>=PICKUP_MAX) break; }
+  if(!items.length){document.getElementById("pickup").remove();document.getElementById("pickupLabel").remove();return}
+  document.getElementById("pickup").innerHTML=items.map(e=>`
+    <button class="pk" data-id="${esc(e.c.id)}">
+      <span class="k ${e.k}">${e.k==="new"?"NEW":"UPDATE"}</span>
+      <img src="${face(e.c,idx[e.c.id])}" alt="">
+      <p class="n">${esc(e.c.title)}</p>
+      <p class="w">${esc(e.text)}</p>
+      <p class="d">${md(e.date)}</p>
+    </button>`).join("");
+})();
+
+/* ================= 絞り込み ================= */
+const state={q:"",cat:"all",genres:new Set(),sort:"new",view:"grid"};
+
+document.getElementById("cats").innerHTML=
+  [["all","すべて"],...CATEGORIES.map(c=>[c,c])].map(([v,l])=>
+    `<button class="cat${v==="all"?" on":""}" data-v="${esc(v)}">${esc(l)}</button>`).join("");
+document.getElementById("genres").innerHTML=
+  [["all","ALL"],...GENRES.map(g=>[g,g])].map(([v,l])=>
+    `<button class="chip${v==="all"?" on":""}" data-v="${esc(v)}">${esc(l)}</button>`).join("");
+
+function filtered(){
+  const q=norm(state.q).trim().split(/\s+/).filter(Boolean);
+  let arr=characters.filter(c=>{
+    if(state.cat!=="all"&&c.category!==state.cat) return false;
+    for(const g of state.genres){ if(!(c.genres||[]).includes(g)) return false; }
+    if(q.length){
+      const hay=norm([c.title,c.tagline,...(c.genres||[]),c.category,...(c.tags||[])].join(" "));
+      if(!q.every(w=>hay.includes(w))) return false;
+    }
+    return true;
+  });
+  if(state.sort==="new") arr.sort((a,b)=>b.published.localeCompare(a.published));
+  if(state.sort==="up")  arr.sort((a,b)=>(lastUpdate(b)||b.published).localeCompare(lastUpdate(a)||a.published));
+  if(state.sort==="name")arr.sort((a,b)=>a.title.localeCompare(b.title,"ja"));
+  return arr;
+}
+
+function render(){
+  const arr=filtered(), box=document.getElementById("results");
+  document.getElementById("count").textContent=`${arr.length} / ${characters.length} CHARA`;
+  if(!arr.length){box.innerHTML=`<p class="empty"><b>NO HIT</b>条件に合うキャラがいません</p>`;return}
+  const badge=c=>{const s=status(c);return s?`<span class="mini ${s}">${s==="new"?"NEW":"UP"}</span>`:""};
+  if(state.view==="grid"){
+    box.innerHTML=`<div class="grid">${arr.map(c=>`
+      <button class="cell" data-id="${esc(c.id)}">
+        <div class="ph"><img src="${face(c,idx[c.id])}" alt="" loading="lazy">${badge(c)}</div>
+        <p class="nm">${esc(c.title)}</p>
+        <p class="gn">${c.category==="シミュレーション"?"シミュ｜":""}${esc((c.genres||[]).join(" / "))}</p>
+      </button>`).join("")}</div>`;
+  }else{
+    box.innerHTML=`<div class="list">${arr.map(c=>`
+      <button class="row" data-id="${esc(c.id)}">
+        <img src="${face(c,idx[c.id])}" alt="" loading="lazy">
+        <div><p class="nm">${esc(c.title)}</p><p class="tl">${esc(c.tagline)}</p>
+        <p class="gn">${esc(c.category)}｜${esc((c.genres||[]).join(" / "))}</p></div>${badge(c)}
+      </button>`).join("")}</div>`;
+  }
+}
+
+function setOn(groupId,val){
+  document.querySelectorAll(`#${groupId} [data-v]`).forEach(b=>b.classList.toggle("on",b.dataset.v===val));
+}
+function jumpToResults(){
+  const top=document.getElementById("allTop").getBoundingClientRect().top+scrollY;
+  if(scrollY>top) scrollTo({top,behavior:"smooth"});
+}
+document.getElementById("cats").addEventListener("click",e=>{
+  const b=e.target.closest("[data-v]");if(!b)return;state.cat=b.dataset.v;setOn("cats",state.cat);render();jumpToResults()});
+document.getElementById("genres").addEventListener("click",e=>{
+  const b=e.target.closest("[data-v]");if(!b)return;
+  const v=b.dataset.v;
+  if(v==="all") state.genres.clear();
+  else state.genres.has(v)?state.genres.delete(v):state.genres.add(v);
+  document.querySelectorAll("#genres [data-v]").forEach(x=>x.classList.toggle("on",
+    x.dataset.v==="all"?state.genres.size===0:state.genres.has(x.dataset.v)));
+  render();jumpToResults()});
+document.getElementById("view").addEventListener("click",e=>{
+  const b=e.target.closest("[data-v]");if(!b)return;state.view=b.dataset.v;setOn("view",state.view);render()});
+document.getElementById("sort").addEventListener("change",e=>{state.sort=e.target.value;render()});
+const qEl=document.getElementById("q"), clr=document.getElementById("clear");
+qEl.addEventListener("input",()=>{state.q=qEl.value;clr.classList.toggle("on",!!qEl.value);render()});
+clr.addEventListener("click",e=>{e.preventDefault();qEl.value="";state.q="";clr.classList.remove("on");render();qEl.focus()});
+
+/* ================= 詳細シート ================= */
+const sheet=document.getElementById("sheet"), scrim=document.getElementById("scrim");
+let openId=null, galAll=false;
+function openSheet(id,refresh){
+  const c=characters.find(x=>x.id===id); if(!c) return;
+  if(!refresh) galAll=false;
+  openId=id;
+  const ill=illustsFor(c);
+  const shown=galAll?ill:ill.slice(0,GALLERY_PREVIEW);
+  const rest=ill.length-shown.length;
+  const galHTML=`<div class="gal"><h4>ILLUST <small>${ill.length?ill.length+" 枚":""}</small></h4>${
+    ill.length?`<div class="gal-grid">${shown.map((im,k)=>`<button data-gi="${k}"><img src="${esc(im.thumb)}" alt="" loading="lazy">${
+      (k===shown.length-1&&rest>0)?`<span class="more" data-more="1">+${rest}</span>`:""}</button>`).join("")}</div>`
+    :`<p class="gal-note">まだイラストはありません</p>`}</div>`;
+  const s=status(c), lu=lastUpdate(c);
+  const story=c.story&&isKyarapu(c.story), talk=c.talk&&isKyarapu(c.talk);
+  const hist=[...(c.updates||[])].sort((a,b)=>b.date.localeCompare(a.date));
+  sheet.innerHTML=`
+    <button class="close" id="closeSheet" aria-label="閉じる">✕</button>
+    <div class="sh-top">
+      <img src="${face(c,idx[c.id])}" alt="${esc(c.title)}">
+      <div>
+        <div class="sh-badges">${s==="new"?`<span class="bd new">NEW</span>`:s==="up"?`<span class="bd up">UPDATE</span>`:""}</div>
+        <h3 class="sh-title">${esc(c.title)}</h3>
+        <p class="sh-cat">${esc(c.category)}</p>
+        <div class="sh-genres">${(c.genres||[]).map(g=>`<span class="sg">${esc(g)}</span>`).join("")}</div>
+      </div>
+    </div>
+    <p class="sh-tl">${esc(c.tagline)}</p>
+    <div class="tags">${(c.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join("")}</div>
+    <p class="sh-date">RELEASE ${dot(c.published)}${lu?` / UPDATE ${dot(lu)}`:""}</p>
+    <div class="btns">
+      ${story?`<a class="btn story" href="${esc(c.story)}" target="_blank" rel="noopener">STORY<small>ストーリー</small></a>`:""}
+      ${talk?`<a class="btn talk" href="${esc(c.talk)}" target="_blank" rel="noopener">TALK<small>トーク</small></a>`:""}
+    </div>
+    ${galHTML}
+    ${hist.length?`<div class="hist"><h4>UPDATE LOG</h4><ul>${hist.map(u=>`<li><span>${dot(u.date)}</span>${esc(u.text)}</li>`).join("")}</ul></div>`:""}`;
+  sheet.classList.add("on");scrim.classList.add("on");document.body.classList.add("lock");
+  document.getElementById("closeSheet").onclick=closeSheet;
+  sheet.querySelectorAll("[data-gi]").forEach(b=>b.onclick=e=>{
+    if(e.target.closest("[data-more]")){galAll=true;openSheet(id,true);return}
+    lbOpen(ill,+b.dataset.gi)});
+}
+function closeSheet(){openId=null;sheet.classList.remove("on");scrim.classList.remove("on");document.body.classList.remove("lock")}
+scrim.addEventListener("click",closeSheet);
+document.addEventListener("keydown",e=>{
+  if(lb.classList.contains("on")){if(e.key==="Escape")lbClose();if(e.key==="ArrowLeft")lbStep(-1);if(e.key==="ArrowRight")lbStep(1);return}
+  if(e.key==="Escape")closeSheet()});
+document.addEventListener("click",e=>{
+  const t=e.target.closest(".pk,.cell,.row"); if(t&&!sheet.contains(t)) openSheet(t.dataset.id);
+});
+
+render();
+</script>
+</body>
+</html>

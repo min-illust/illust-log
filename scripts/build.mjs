@@ -162,6 +162,103 @@ for (const p of posts) {
   await fs.writeFile(path.join(dir, "index.html"), page({ title: `${p.title}｜${siteTitle}`, desc, url: `${SITE_URL}/w/${p.slug}/`, og: p.images[0]?.og || defaultOg, post: p.slug }));
 }
 
+// ---------- キャラリンク集（/chara/・キャラぷに貼る用） ----------
+// キャラぷ以外へのリンクは出さない。イラストは ILLUST LOG の作品から自動で紐づけ（リンクはせず画像だけ）。
+const CHARA_CATS = ["1:1ロールプレイ", "シミュレーション"];
+const CHARA_GENRES = ["恋愛", "日常・現代", "ファンタジー", "BL", "その他"];
+const isKyarapu = (u) => {
+  try { const x = new URL(String(u).trim()); return x.protocol === "https:" && (x.hostname === "kyarapu.com" || x.hostname.endsWith(".kyarapu.com")); }
+  catch { return false; }
+};
+const urlKey = (u) => { try { const x = new URL(String(u).trim()); return (x.hostname + x.pathname).replace(/\/+$/, "").toLowerCase(); } catch { return ""; } };
+const normName = (s) => String(s || "").normalize("NFKC").toLowerCase()
+  .replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60)).replace(/\s/g, "");
+
+// サムネ：正方形に切り抜き（顔が入りやすいよう注目領域を優先）
+const thumbDone = new Map();
+async function charaThumb(src) {
+  if (!src) return "";
+  if (thumbDone.has(src)) return thumbDone.get(src);
+  const rel = String(src).replace(/^\/+/, "");
+  const file = path.join(ROOT, rel);
+  if (!rel.startsWith("images/") || !(await exists(file))) { console.warn("キャラのサムネが見つかりません:", src); thumbDone.set(src, ""); return ""; }
+  const buf = await fs.readFile(file);
+  const hash = crypto.createHash("sha1").update(buf).digest("hex").slice(0, 12);
+  const name = sharp ? `img/c-${hash}.webp` : `img/c-${hash}${path.extname(rel) || ".jpg"}`;
+  const cached = path.join(CACHE, path.basename(name));
+  if (!(await exists(cached))) {
+    await fs.mkdir(CACHE, { recursive: true });
+    if (sharp) {
+      const out = await sharp(buf).rotate().resize({ width: 480, height: 480, fit: "cover", position: sharp.strategy.attention }).webp({ quality: 80 }).toBuffer();
+      await fs.writeFile(cached, out);
+    } else await fs.writeFile(cached, buf);
+  }
+  await fs.mkdir(path.join(OUT, "img"), { recursive: true });
+  await fs.copyFile(cached, path.join(OUT, name));
+  const r = `${BASE}/${name}`;
+  thumbDone.set(src, r);
+  return r;
+}
+
+const charaDir = path.join(ROOT, "content/characters");
+const charaFiles = (await exists(charaDir)) ? (await fs.readdir(charaDir)).filter((f) => f.endsWith(".json")) : [];
+const characters = [];
+for (const f of charaFiles) {
+  const raw = await readJSON(path.join(charaDir, f), null);
+  if (!raw || !raw.title || !day(raw.published)) { console.warn("読み込めないキャラ:", f); continue; }
+  const story = isKyarapu(raw.story || "") ? String(raw.story).trim() : "";
+  const talk = isKyarapu(raw.talk || "") ? String(raw.talk).trim() : "";
+  if (raw.story && !story) console.warn("キャラぷ以外のURLなので外しました:", f, raw.story);
+  if (raw.talk && !talk) console.warn("キャラぷ以外のURLなので外しました:", f, raw.talk);
+  const genres = list(raw.genres).filter((g) => CHARA_GENRES.includes(g));
+  const updates = (Array.isArray(raw.updates) ? raw.updates : [])
+    .map((u) => ({ date: day(u && u.date), text: String((u && u.text) || "").trim() }))
+    .filter((u) => u.date && u.text).sort((a, b) => b.date.localeCompare(a.date));
+
+  // イラストの紐づけ：キャラぷURLが同じ作品 or タグがキャラ名（別名）と同じ作品
+  const keys = [story, talk].filter(Boolean).map(urlKey);
+  const names = [raw.title, ...list(raw.illust_tags)].map(normName).filter(Boolean);
+  const illusts = [];
+  for (const p of posts) {
+    const byUrl = p.charapu && keys.includes(urlKey(p.charapu));
+    const byTag = p.tags.some((t) => names.includes(normName(t)));
+    if (byUrl || byTag) for (const im of p.images) illusts.push({ src: im.src, thumb: im.thumb, title: p.title, date: p.date });
+  }
+
+  characters.push({
+    id: f.replace(/\.json$/, "").replace(/[^\w-]/g, "-"),
+    title: String(raw.title).trim(),
+    category: CHARA_CATS.includes(raw.category) ? raw.category : CHARA_CATS[0],
+    genres: genres.length ? genres : ["その他"],
+    tagline: String(raw.tagline || "").trim(),
+    tags: [...new Set(list(raw.tags).map((t) => t.replace(/^#/, "")))],
+    published: day(raw.published),
+    thumb: await charaThumb(raw.thumb),
+    story, talk, updates, illusts,
+  });
+}
+characters.sort((a, b) => b.published.localeCompare(a.published) || b.id.localeCompare(a.id));
+
+{
+  const tpl = await fs.readFile(path.join(ROOT, "site/chara.html"), "utf8");
+  const ctitle = "Min. | Characters";
+  const cdesc = "Min.がキャラぷで公開しているキャラクターの一覧";
+  const cog = characters.find((c) => c.thumb)?.thumb;
+  const head = [
+    `<title>${ctitle}</title>`,
+    `<meta name="description" content="${esc(cdesc)}">`,
+    `<link rel="canonical" href="${esc(SITE_URL)}/chara/">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:title" content="${ctitle}">`,
+    `<meta property="og:description" content="${esc(cdesc)}">`,
+    cog ? `<meta property="og:image" content="${esc(SITE_URL + cog.replace(BASE, ""))}">` : "",
+  ].filter(Boolean).join("\n");
+  const boot = `<script>window.__CHARA=${JSON.stringify({ updated: new Date().toISOString(), categories: CHARA_CATS, genres: CHARA_GENRES, characters }).replace(/</g, "\\u003c")};</script>`;
+  await fs.mkdir(path.join(OUT, "chara"), { recursive: true });
+  await fs.writeFile(path.join(OUT, "chara/index.html"), tpl.replace("<!--HEAD-->", head).replace("<!--BOOT-->", boot));
+  console.log(`キャラリンク集：${characters.length} 体／イラスト紐づけ ${characters.reduce((n, c) => n + c.illusts.length, 0)} 枚`);
+}
+
 // 管理画面はNetlify側へ案内
 await fs.mkdir(path.join(OUT, "admin"), { recursive: true });
 await fs.writeFile(path.join(OUT, "admin/index.html"), `<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${ADMIN_URL}"><a href="${ADMIN_URL}">管理画面へ</a>`);
